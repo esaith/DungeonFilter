@@ -1,0 +1,9 @@
+﻿## Interface: 90000
+## Title: Dungeon Filter
+## Version: 0.1
+## Notes: Filter Dungeons
+## Author: eSaith
+## SavedVariables: eDungeonFilter
+
+DungeonFilter.lua
+DungeonFilter.xml
