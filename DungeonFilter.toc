@@ -1,6 +1,6 @@
-﻿## Interface: 90000
+﻿## Interface: 100000
 ## Title: Dungeon Filter
-## Version: 0.1
+## Version: 0.2
 ## Notes: Filter Dungeons
 ## Author: eSaith
 ## SavedVariables: eDungeonFilter

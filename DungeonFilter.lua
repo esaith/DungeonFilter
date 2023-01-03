@@ -11,14 +11,14 @@ function SlashCmdList.DUNGEONFILTER(msg, editbox)
 end
 
 local dungeons = {}
-dungeons['dos'] = 'De Other Side'
-dungeons['hoa'] = 'Halls of Atonement'
-dungeons['mots'] = 'Mists of Tirna Scithe'
-dungeons['pf'] = 'Plaguefall'
-dungeons['sd'] = 'Sanguine Depths'
-dungeons['soa'] = 'Spires of Ascension'
-dungeons['tnw'] = 'The Necrotic Wake'
-dungeons['top'] = 'Theater of Pain'
+dungeons['totjs'] = 'Temple of the Jade Serpent'
+dungeons['aa'] = 'Algeth\'ar Academy'
+dungeons['no'] = 'The Nokhud Offensive'
+dungeons['av'] = 'The Azure Vault'
+dungeons['sbg'] = 'Shadowmoon Burial Grounds'
+dungeons['rlp'] = 'Ruby Life Pools'
+dungeons['hov'] = 'Halls of Valor'
+dungeons['cos'] = 'Court of Stars'
 
 local reverseDungeons = {}
 for k, v in pairs(dungeons) do
@@ -49,40 +49,28 @@ local function ToggleOption(self)
 end
 
 local function CreateLayout()
-    local btn = CreateFrame('CheckButton', 'DungeonFilter_dos_CheckButton', DungeonFilter, 'UICheckButtonTemplate')
-    btn:SetPoint('TOPLEFT', DungeonFilter, 'TOPLEFT', 20, -40)
-    btn:SetSize(25, 25)
-    btn.Name = 'dos'
-    btn:SetScript('OnClick', ToggleOption)
-    local fontstring = btn:CreateFontString('$parent_FontString', 'ARTWORK', 'GameFontNormal')
-    fontstring:SetText('De Other Side')
-    fontstring:SetPoint('LEFT', '$parent', 'RIGHT', 0, 0)
-    btn:SetFontString(fontstring)
-    btn:Show()
-
-    local previousButton = _G['DungeonFilter_dos_CheckButton']
+    local previousButton = nil;
+    local btn = nil; 
+    local fontstring = nil;
 
     for k, v in pairs(dungeons) do
-        if k ~= 'dos' then
-            btn =
-                CreateFrame(
-                'CheckButton',
-                'DungeonFilter_' .. k .. '_CheckButton',
-                DungeonFilter,
-                'UICheckButtonTemplate'
-            )
+        btn = CreateFrame('CheckButton', 'DungeonFilter_' .. k .. '_CheckButton', DungeonFilter, 'UICheckButtonTemplate')        
+        btn:SetSize(25, 25)
+        btn.Name = k
+        btn:SetScript('OnClick', ToggleOption)
+        fontstring = btn:CreateFontString('$parent_FontString', 'ARTWORK', 'GameFontNormal')
+        fontstring:SetText(v)
+        fontstring:SetPoint('LEFT', '$parent', 'RIGHT', 0, 0)
+        btn:SetFontString(fontstring)
+        btn:Show()
 
-            btn.Name = k
+        if previousButton == nil then
+            btn:SetPoint('TOPLEFT', DungeonFilter, 'TOPLEFT', 20, -40)
+        else            
             btn:SetPoint('TOP', previousButton, 'BOTTOM', 0, -5)
-            btn:SetSize(25, 25)
-            btn:SetScript('OnClick', ToggleOption)
-            fontstring = btn:CreateFontString('$parent_FontString', 'ARTWORK', 'GameFontNormal')
-            fontstring:SetText(v)
-            fontstring:SetPoint('LEFT', '$parent', 'RIGHT', 0, 0)
-            btn:SetFontString(fontstring)
-            btn:Show()
-            previousButton = _G['DungeonFilter_' .. k .. '_CheckButton']
         end
+
+        previousButton = _G['DungeonFilter_' .. k .. '_CheckButton']
     end
 end
 
@@ -142,10 +130,10 @@ local function LFGListUtil_SortSearchResults_Hook(results)
 
     for _, searchId in pairs(results) do
         local searchResultInfo = C_LFGList.GetSearchResultInfo(searchId)
-        local activityName = C_LFGList.GetActivityInfo(searchResultInfo.activityID, nil, searchResultInfo.isWarMode)
+        local activityTable = C_LFGList.GetActivityInfoTable(searchResultInfo.activityID)
 
-        if string.find(activityName, 'Keystone') and not isTitleSpam(searchResultInfo.name) then
-            local shortDungeonName = reverseDungeons[activityName]
+        if activityTable.isMythicPlusActivity and not isTitleSpam(searchResultInfo.name) then
+            local shortDungeonName = reverseDungeons[activityTable.fullName]
 
             if not _G['DungeonFilter_' .. shortDungeonName .. '_CheckButton']:GetChecked() then
                 for i = 1, #results, 1 do
@@ -165,13 +153,7 @@ local function LFGListUtil_SortSearchResults_Hook(results)
         end
     end
 
-    local sortedKeys =
-        getKeysSortedByValue(
-        idsToRemove,
-        function(a, b)
-            return a > b
-        end
-    )
+    local sortedKeys = getKeysSortedByValue(idsToRemove, function(a, b) return a > b end)
 
     for _, key in ipairs(sortedKeys) do
         table.remove(results, idsToRemove[key])
@@ -188,7 +170,9 @@ end
 local function SetCheckBoxes()
     if eDungeonFilter ~= nil then
         for key, value in pairs(eDungeonFilter) do
-            _G['DungeonFilter_' .. key .. '_CheckButton']:SetChecked(value)
+            if _G['DungeonFilter_' .. key .. '_CheckButton'] ~= nil then
+                _G['DungeonFilter_' .. key .. '_CheckButton']:SetChecked(value)
+            end
         end
     else
         eDungeonFilter = {}
@@ -218,3 +202,29 @@ end
 function DungeonFilter_OnStopDrag(self, event, ...)
     self:StopMovingOrSizing()
 end
+
+-- The following is code snippet to help prevent the follow LUA error that Blizzard throws
+-- ADDON_ACTION_BLOCKED due to protected function GetPlaystyleString()
+-- https://github.com/0xbs/premade-groups-filter/issues/64
+
+function LFMPlus_GetPlaystyleString(playstyle,activityInfo)
+    if activityInfo and playstyle ~= (0 or nil) and C_LFGList.GetLfgCategoryInfo(activityInfo.categoryID).showPlaystyleDropdown then
+      local typeStr
+      if activityInfo.isMythicPlusActivity then
+        typeStr = "GROUP_FINDER_PVE_PLAYSTYLE"
+      elseif activityInfo.isRatedPvpActivity then
+        typeStr = "GROUP_FINDER_PVP_PLAYSTYLE"
+      elseif activityInfo.isCurrentRaidActivity then
+        typeStr = "GROUP_FINDER_PVE_RAID_PLAYSTYLE"
+      elseif activityInfo.isMythicActivity then
+        typeStr = "GROUP_FINDER_PVE_MYTHICZERO_PLAYSTYLE"
+      end
+      return typeStr and _G[typeStr .. tostring(playstyle)] or nil
+    else
+      return nil
+    end
+  end
+  
+  C_LFGList.GetPlaystyleString = function(playstyle,activityInfo)
+    return LFMPlus_GetPlaystyleString(playstyle, activityInfo)
+  end
