@@ -132,22 +132,17 @@ local function LFGListUtil_SortSearchResults_Hook(results)
         local searchResultInfo = C_LFGList.GetSearchResultInfo(searchId)
         local activityTable = C_LFGList.GetActivityInfoTable(searchResultInfo.activityID)
 
-        if activityTable.isMythicPlusActivity and not isTitleSpam(searchResultInfo.name) then
-            local shortDungeonName = reverseDungeons[activityTable.fullName]
+        if activityTable.isMythicPlusActivity then
+            if not isTitleSpam(searchResultInfo.name) then
+                local shortDungeonName = reverseDungeons[activityTable.fullName]
 
-            if not _G['DungeonFilter_' .. shortDungeonName .. '_CheckButton']:GetChecked() then
-                for i = 1, #results, 1 do
-                    if (results[i] == searchId) then
-                        table.insert(idsToRemove, i)
-                        break
+                if not _G['DungeonFilter_' .. shortDungeonName .. '_CheckButton']:GetChecked() then
+                    for i = 1, #results, 1 do
+                        if (results[i] == searchId) then
+                            table.insert(idsToRemove, i)
+                            break
+                        end
                     end
-                end
-            end
-        else
-            for i = 1, #results, 1 do
-                if (results[i] == searchId) then
-                    table.insert(idsToRemove, i)
-                    break
                 end
             end
         end
