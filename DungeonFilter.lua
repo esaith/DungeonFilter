@@ -11,15 +11,15 @@ function SlashCmdList.DUNGEONFILTER(msg, editbox)
 end
 
 local dungeons = {}
-dungeons['totjs'] = 'Temple of the Jade Serpent'
-dungeons['aa'] = 'Algeth\'ar Academy'
-dungeons['no'] = 'The Nokhud Offensive'
-dungeons['av'] = 'The Azure Vault'
-dungeons['sbg'] = 'Shadowmoon Burial Grounds'
-dungeons['rlp'] = 'Ruby Life Pools'
-dungeons['hov'] = 'Halls of Valor'
-dungeons['cos'] = 'Court of Stars'
-
+dungeons['tott'] = 'Throne of the Tides'
+dungeons['dht'] = 'Darkheart Thicket'
+dungeons['eb'] = 'The Everbloom'
+dungeons['brh'] = 'Black Rook Hold'
+dungeons['wm'] = 'Waycrest Manor'
+dungeons['fall'] = 'Galakrond\'s Fall - Dawn of the Infinite'
+dungeons['ad'] = 'Atal\'Dazar'
+dungeons['rise'] = 'Murozond\'s Rise - Dawn of the Infinite'
+ 
 local reverseDungeons = {}
 for k, v in pairs(dungeons) do
     reverseDungeons[v .. ' (Mythic Keystone)'] = k
@@ -134,16 +134,20 @@ local function LFGListUtil_SortSearchResults_Hook(results)
 
         if activityTable.isMythicPlusActivity then
             if not isTitleSpam(searchResultInfo.name) then
-                local shortDungeonName = reverseDungeons[activityTable.fullName]
+				local shortDungeonName = reverseDungeons[activityTable.fullName]
 
-                if not _G['DungeonFilter_' .. shortDungeonName .. '_CheckButton']:GetChecked() then
-                    for i = 1, #results, 1 do
-                        if (results[i] == searchId) then
-                            table.insert(idsToRemove, i)
-                            break
-                        end
-                    end
-                end
+				if shortDungeonName == nil then
+					print(activityTable.fullName)
+				else
+					if not _G['DungeonFilter_' .. shortDungeonName .. '_CheckButton']:GetChecked() then
+						for i = 1, #results, 1 do
+							if (results[i] == searchId) then
+								table.insert(idsToRemove, i)
+								break
+							end
+						end
+					end
+				end
             end
         end
     end

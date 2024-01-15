@@ -7,7 +7,7 @@
   <Frame name="DungeonFilter" parent="LFGListFrame" hidden="true" frameStrata="HIGH" inherits="BasicFrameTemplateWithInset" movable="true">
     <Size x="300" y="300" />
     <Anchors>
-      <Anchor point="TOPLEFT" relativeTo="LFGListFrame" relativePoint="TOPRIGHT" />
+      <Anchor point="TOPLEFT" relativeTo="LFGListFrame" relativePoint="RIGHT" y="-45"/>
     </Anchors>
     <Layers>
       <Layer level="BACKGROUND">
