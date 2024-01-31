@@ -2,12 +2,12 @@ if SlashCmdList == nil then
     SlashCmdList = {};
 end
 
-if DungeonFilter == nil then
-    DungeonFilter = {}
+if eDungeonFilter == nil then
+    eDungeonFilter = {}
 end
 
-if DungeonFilterRate == nil then
-    DungeonFilterRate = {}
+if eDungeonFilter == nil then
+    eDungeonFilter = {}
 end
 
 if C_LFGList == nil then

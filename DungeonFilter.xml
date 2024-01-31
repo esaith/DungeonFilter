@@ -24,22 +24,54 @@
       <OnDragStop function="DungeonFilter_OnStopDrag" />
     </Scripts>  
   </Frame>
-  <Frame name="DungeonFilterRate" parent="LFGListFrame" hidden="true" frameStrata="HIGH" inherits="BasicFrameTemplateWithInset" movable="true">
-    <Size x="300" y="300" />
-    <Anchors>
-      <Anchor point="TOPLEFT" relativeTo="LFGListFrame" relativePoint="RIGHT" y="-45"/>
-    </Anchors>
-    <Layers>
-      <Layer level="BACKGROUND">
-        <Texture name="$parentBackground">
-          <Color r=".11" g=".16" b=".18" a="1" />
-        </Texture>
-      </Layer>
-    </Layers>     
+  <Frame name="DungeonFilterRate" parent="UIParent" hidden="false" frameStrata="HIGH" inherits="BasicFrameTemplateWithInset" movable="true">
+    <Size x="600" y="400" />      
     <Scripts>
+      <OnLoad function="DungeonFilterRate_OnLoad"/>
       <OnMouseDown function="DungeonFilter_OnMouseDown"/>
       <OnMouseUp function="DungeonFilter_OnMouseUp"/>
       <OnDragStop function="DungeonFilter_OnStopDrag" />
     </Scripts> 
   </Frame>
+  <EditBox name="ChatFrameEditBoxTemplateCustom" autoFocus="false" 
+      frameStrata="DIALOG" toplevel="true" hidden="false" virtual="true" multiline="true">
+    <Size x="400" y="240"/>
+    <FontString inherits="GameFontHighlightSmall"/>
+		<Layers>
+			<Layer level="BORDER">
+				<Texture name="$parentLeft" file="Interface\DialogFrame\DialogFrame-Left">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativePoint="TOPLEFT" x="-13" y="3"/>
+            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" y="-10"/>
+					</Anchors>
+				</Texture>
+        <Texture name="$parentRight" file="Interface\DialogFrame\DialogFrame-Right">
+					<Anchors>
+						<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" y="7" x="8"/>
+						<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" y="-10"/>
+					</Anchors>
+				</Texture>
+        <Texture name="$parentTop" file="Interface\DialogFrame\DialogFrame-Top">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativePoint="TOPLEFT" x="-8" y="12"/>
+						<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" x="3"/>
+					</Anchors>
+				</Texture>
+        <Texture name="$parentBottom" file="Interface\DialogFrame\DialogFrame-Top">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" x="-8" y="-22"/>
+						<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" x="3"/>
+					</Anchors>
+				</Texture>        
+			</Layer>			
+		</Layers>
+  </EditBox>
+  <ScrollFrame name="NotepadEditScrollFrame" inherits="UIPanelScrollFrameTemplate" virtual="true">
+    <ScrollChild>
+      <EditBox name="NotepadEditBox" multiline="true" autoFocus="false" hyperLinksEnabled="true">
+        <Size x="327" y="240"/>
+        <FontString inherits="GameFontHighlightSmall"/>              
+      </EditBox>
+    </ScrollChild>
+  </ScrollFrame>
 </Ui>

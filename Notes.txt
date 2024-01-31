@@ -1,0 +1,72 @@
+On mythic+ start
+ -- Set current group.
+
+On mythic+ end
+On player leave
+On party member leave	
+	-- If current mythic+ group, 
+		-- Show modal asking how good users were. 
+		-- Null out current mythic+ group on [Submit]
+
+On log/relog/reload
+ -- If in mythic+, set current group
+  
+
+Rating Modal 
+ -- Show each players name. 
+ -- Rate each player
+ -- A note
+ -- Dungeon Note. Will be appended to the note of all players so that it does not be copied/pasted for each party member
+ 
+Saith - Proudmoore
+Player Note: <See previous notes>
+Bad | Meh | Good | Very good
+Run Note: <Any note you want to add about this run>
+
+[Submit] 
+
+If the user toggles a rating, the rating will be selected and highlighted
+If the user toggles a rating, the rating will be unselected.
+If there is no rating selected, the player entry will not be added. 
+ 
+ 
+Tool Tip
+On hover, you can see the notes about the player.
+Consider creating a new tooltip component. 
+Allow scrolling
+
+1/29/24 +24 BRH Timed
+Good
+Notes: Add some notes here
+
+1/28/24 +23 BRH Not Timed
+Good
+Notes: Add some other notes here
+
+1/28/24 +23 BRH Timed
+Good
+Notes: Add some other notes here
+
+[
+  {
+	Name: 'Saith - Proudmoore'
+	Entries: [
+	  [0]: {
+       Date: '1/29/04',
+       DifficultyLevel: 5,
+       DungeonId: 5   -- BRH,
+       Rate: 'Good',
+       Timed: true
+       Notes: '' 
+      },
+	  [1]: {
+       Date: '1/29/04',
+       DifficultyLevel: 5,
+       DungeonId: 5   -- BRH,
+       Rate: 'Good',
+       Timed: true
+       Notes: '' 
+      }
+    ]
+  }
+]
