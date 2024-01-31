@@ -134,7 +134,7 @@ local function AddRateButton(label, row, column,  neighborButton)
     button:SetScript('OnClick', SetPartyMemberRating)
 
     if column == 1 then
-        button:SetPoint('TOPLEFT', neighborButton, 'BOTTOMLEFT', 0, -5)
+        button:SetPoint('TOPLEFT', neighborButton, 'BOTTOMLEFT', -5, -5)
     else
         button:SetPoint('LEFT', neighborButton, 'RIGHT', 10, 0)
     end
@@ -178,17 +178,16 @@ end
 local function CreateRateLayout()
     local row = 0
     local previousWidget = DungeonFilterRate
-    DungeonFilterRate:SetScale(2.5)
 
-    while row < 2 do
+    while row < 4 do
         row = row + 1
 
         local fontstring = DungeonFilterRate:CreateFontString('DungeonFilterRate_FontString'..row, 'ARTWORK', 'GameFontNormal')
 
         if row == 1 then
-            fontstring:SetPoint('TOPLEFT', previousWidget, 'TOPLEFT', 15, -35)
+            fontstring:SetPoint('TOPLEFT', previousWidget, 'TOPLEFT', 20, -35)
         else
-            fontstring:SetPoint('TOPLEFT', previousWidget, 'TOPLEFT', 0, -80)
+            fontstring:SetPoint('TOPLEFT', previousWidget, 'BOTTOMLEFT', 0, -20)
         end
 
         fontstring:SetText('Player '.. row)
@@ -202,12 +201,6 @@ local function CreateRateLayout()
         local editButton = CreateFrame('EditBox', name, DungeonFilterRate, 'ChatFrameEditBoxTemplateCustom')
         editButton:SetPoint('TOPLEFT', btnA, 'BOTTOMLEFT', 5, -10)
       
-        editButton:SetFontObject("GameFontNormal")
-        editButton:SetAutoFocus(false)
-        
-        
-        -- sf:SetScrollChild(eb)
-
         previousWidget = editButton
     end
 end
@@ -376,10 +369,6 @@ eDungeonFilter.SetCurrentParty = function()
     else
         eDungeonFilter.CurrentParty = nil
     end
-end
-
-eDungeonFilter.UpdateRateUI = function()
-
 end
 
 eDungeonFilter.RatePlayers = function()
