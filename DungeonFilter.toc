@@ -3,7 +3,7 @@
 ## Version: 0.3
 ## Notes: Filter Dungeons
 ## Author: eSaith
-## SavedVariables: eDungeonFilterVar, eDungeonFilterPartyVar
+## SavedVariables: eDungeonFilterVar, eDungeonFilterPartyTemp
 
 DungeonFilter.lua
 DungeonFilter.xml

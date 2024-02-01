@@ -27,7 +27,6 @@
   <Frame name="DungeonFilterRate" parent="UIParent" hidden="true" frameStrata="HIGH" inherits="BasicFrameTemplateWithInset" movable="true">
     <Size x="450" y="500" />      
     <Scripts>
-      <OnLoad function="DungeonFilterRate_OnLoad"/>
       <OnMouseDown function="DungeonFilter_OnMouseDown"/>
       <OnMouseUp function="DungeonFilter_OnMouseUp"/>
       <OnDragStop function="DungeonFilter_OnStopDrag" />
