@@ -1,8 +1,12 @@
-﻿SLASH_DUNGEONFILTER1 = "/rate"
+﻿---@diagnostic disable: duplicate-set-field
+SLASH_DUNGEONFILTER1 = "/rate"
 SLASH_DUNGEONFILTER2 = "/erate"
 
 local DungeonCategoryId = 2
-eDungeonFilter = {}
+
+if eDungeonFilter == nil then
+    eDungeonFilter = {}
+end
 
 if eDungeonFilterVar == nil then
     eDungeonFilterVar = {}
@@ -10,6 +14,10 @@ end
 
 if eDungeonFilterVar.Player == nil then
     eDungeonFilterVar.Player = {}
+end
+
+if DungeonFilter == nil then
+    DungeonFilter = {}
 end
 
 local dungeons = {}
@@ -22,7 +30,7 @@ dungeons["fall"] = "Galakrond's Fall - Dawn of the Infinite"
 dungeons["ad"] = "Atal'Dazar"
 dungeons["rise"] = "Murozond's Rise - Dawn of the Infinite"
 
-reversedDungeons = {}
+local reversedDungeons = {}
 for k, v in pairs(dungeons) do
     reversedDungeons[v .. " (Mythic Keystone)"] = k
 end
@@ -31,6 +39,7 @@ function DungeonFilter_OnLoad(self, event, ...)
     self:RegisterForDrag("LeftButton", "RightButton")
     self:RegisterEvent("ADDON_LOADED")
     self:RegisterEvent("LFG_LIST_SEARCH_RESULTS_RECEIVED")
+    self:RegisterEvent("PLAYER_LOGOUT")
     self:RegisterEvent("LFG_LOCK_INFO_RECEIVED")
     self:RegisterEvent("CHALLENGE_MODE_START")
     self:RegisterEvent("CHALLENGE_MODE_COMPLETED")
@@ -40,8 +49,8 @@ end
 local function ShowDungeonFilter()
     if
         LFGListFrame.SearchPanel:IsShown() and LFGListFrame.SearchPanel.categoryID == DungeonCategoryId and
-            LFGListFrame.SearchPanel.SearchBox:IsShown()
-     then
+        LFGListFrame.SearchPanel.SearchBox:IsShown()
+    then
         DungeonFilter:Show()
     else
         DungeonFilter:Hide()
@@ -85,12 +94,10 @@ end
 
 local function GetRateButtonName(row, column)
     if row == nil then
-        print("Unable to get button name. Row is nil")
         return
     end
 
     if column == nil then
-        print("Unable to get button name. Column is nil")
         return
     end
 
@@ -119,7 +126,7 @@ end
 
 local function AddRateButton(label, row, column, neighborButton)
     local name = GetRateButtonName(row, column)
-    local button = CreateFrame("Button", name, DungeonFilterRate, "UIMenuButtonStretchTemplate")
+    local button = eDungeonFilter.CreateFrame("Button", name, DungeonFilterRate, "UIMenuButtonStretchTemplate")
 
     if string.len(label) <= 4 then
         button:SetSize(50, 25)
@@ -157,36 +164,32 @@ local function ResetRateButtons()
     while row < 4 do
         local column = 0
         row = row + 1
-        local editBox = _G["DungeonFilterRate_EditBox_" .. row]
+        local editBox = eDungeonFilter.GetFrame("DungeonFilterRate_EditBox_" .. row)
         editBox:SetText("")
 
         while column < 4 do
             column = column + 1
-            local fontString = eDungeonFilter.GetButton(GetRateButtonName(row, column)):GetFontString()
+            local buttonName = GetRateButtonName(row, column)
+            local fontString = eDungeonFilter.GetFrame(buttonName):GetFontString()
             fontString:SetTextColor(1, 1, 1)
         end
     end
 end
 
 local function UpdateRateButtons()
-    if eDungeonFilter == nil then
-        print("eDungeonFilter is nil!??!?!")
-    end
-
-    local cachedParty = eDungeonFilter.GetCachedParty()
-    if cachedParty == nil then
-        print("cachedParty is empty. Skipping updating rate buttons")
+    local mythicParty = eDungeonFilter:GetMythicParty()
+    if mythicParty == nil then
+        print('mythic party is null')
         return
     end
 
-    for key, name in ipairs(cachedParty.Players) do
+    for key, name in ipairs(mythicParty.Players) do
         local fontString = eDungeonFilter.GetFontString("DungeonFilterRate_FontString" .. key)
-
-        if fontString == nil then
-            print("Font string is nil " .. key)
+        if fontString then
+            fontString:SetText(name)
+        else
+            print("FontString is nil " .. key)
         end
-
-        fontString:SetText(name)
     end
 
     ResetRateButtons()
@@ -195,13 +198,14 @@ end
 local function SubmitRating()
     DungeonFilterRate:Hide()
     local todaysDate = date("%b %d, %Y")
+    local mythicParty = eDungeonFilter:GetMythicParty()
 
-    if eDungeonFilterPartyTemp == nil then
+    if mythicParty == nil then
         ResetRateButtons()
         return
     end
 
-    for row, playerName in ipairs(eDungeonFilterPartyTemp.Players) do
+    for row, playerName in ipairs(mythicParty.Players) do
         local column = 0
         local rating = 0
         local editBox = _G["DungeonFilterRate_EditBox_" .. row]
@@ -233,8 +237,8 @@ local function SubmitRating()
 
             local entry = {
                 Date = todaysDate,
-                DifficultyLevel = eDungeonFilterPartyTemp.Level,
-                DungeonName = eDungeonFilterPartyTemp.DungeonName,
+                DifficultyLevel = mythicParty.Level,
+                DungeonName = mythicParty.DungeonName,
                 Rate = row,
                 Note = note
             }
@@ -244,12 +248,12 @@ local function SubmitRating()
     end
 
     ResetRateButtons()
-    eDungeonFilterPartyTemp = nil
+    mythicParty = nil
 end
 
 local function CreateSubmitButton()
     local name = "DungeonFilterRate_Submit_Button"
-    local button = CreateFrame("Button", name, DungeonFilterRate, "UIMenuButtonStretchTemplate")
+    local button = eDungeonFilter.CreateFrame("Button", name, DungeonFilterRate, "UIMenuButtonStretchTemplate")
 
     button:SetSize(50, 25)
     button.Name = name
@@ -287,13 +291,15 @@ local function CreateRateLayout()
         local btnD = AddRateButton("Very Good", row, 4, btnC)
 
         local name = "DungeonFilterRate_EditBox_" .. row
-        local editButton = CreateFrame("EditBox", name, DungeonFilterRate, "ChatFrameEditBoxTemplateCustom")
+
+        local editButton = eDungeonFilter.CreateFrame("EditBox", name, DungeonFilterRate,
+            "ChatFrameEditBoxTemplateCustom")
         editButton:SetPoint("TOPLEFT", btnA, "BOTTOMLEFT", 5, -10)
 
         previousWidget = editButton
     end
 
-    CreateSubmitButton(previousWidget)
+    CreateSubmitButton()
 end
 
 local function getKeysSortedByValue(tbl, sortFunction)
@@ -376,11 +382,11 @@ local function LFGListUtil_SortSearchResults_Hook(results)
 
     local sortedKeys =
         getKeysSortedByValue(
-        idsToRemove,
-        function(a, b)
-            return a > b
-        end
-    )
+            idsToRemove,
+            function(a, b)
+                return a > b
+            end
+        )
 
     for _, key in ipairs(sortedKeys) do
         table.remove(results, idsToRemove[key])
@@ -394,7 +400,7 @@ local function AddHooks()
     hooksecurefunc("LFGListUtil_SortSearchResults", LFGListUtil_SortSearchResults_Hook)
 end
 
-eDungeonFilter.PrintTable = function(tb, spacing)
+function eDungeonFilter.PrintTable(tb, spacing)
     if spacing == nil then
         spacing = ""
     end
@@ -421,7 +427,6 @@ eDungeonFilter.PrintTable = function(tb, spacing)
 
     print(spacing .. "{")
 
-    local count = 0
     for k, v in pairs(tb) do
         if type(v) == "table" then
             print(spacing .. "  " .. k .. ":")
@@ -434,7 +439,15 @@ eDungeonFilter.PrintTable = function(tb, spacing)
     print(spacing .. "}")
 end
 
-eDungeonFilter.GetParty = function()
+function eDungeonFilter.GetInstanceInfo()
+    return GetInstanceInfo()
+end
+
+function eDungeonFilter.GetActiveKeystoneInfo()
+    return C_ChallengeMode.GetActiveKeystoneInfo()
+end
+
+function eDungeonFilter.GetParty()
     local partyInfo = GetHomePartyInfo() or {}
     local result = {}
 
@@ -454,54 +467,55 @@ eDungeonFilter.GetParty = function()
     return result
 end
 
-eDungeonFilter.GetInstanceInfo = function()
-    return GetInstanceInfo()
-end
-
-eDungeonFilter.GetActiveKeystoneInfo = function()
-    return C_ChallengeMode.GetActiveKeystoneInfo()
-end
-
-eDungeonFilter.CacheParty = function()
-    if C_ChallengeMode.IsChallengeModeActive() then
-        eDungeonFilterPartyTemp = {
+function eDungeonFilter:SetNewMythicParty(party)
+    if party == nil then
+        self.MythicGroup = {
             Players = eDungeonFilter.GetParty(),
             DungeonName = eDungeonFilter.GetInstanceInfo(),
             Level = eDungeonFilter.GetActiveKeystoneInfo()
         }
+    else
+        self.MythicGroup = party
     end
 end
 
-eDungeonFilter.GetCachedParty = function()
-    return eDungeonFilterPartyTemp
+function eDungeonFilter:ClearMythicParty()
+    self.MythicGroup = nil
 end
 
-eDungeonFilter.OnChallengeModeStart = function()
-    eDungeonFilter.CacheParty()
+function eDungeonFilter:GetMythicParty()
+    if self == nil then
+        return nil
+    end
+
+    return self.MythicGroup
 end
 
-eDungeonFilter.OnChallengeModeComplete = function()
+function eDungeonFilter.OnChallengeModeStart()
+    eDungeonFilter:SetNewMythicParty()
+end
+
+function eDungeonFilter.OnChallengeModeComplete()
     UpdateRateButtons()
     DungeonFilterRate:Show()
 end
 
-eDungeonFilter.OnGroupRosterUpdate = function()
-    -- if eDungeonFilterPartyTemp ~= nil then
-    --     DungeonFilterRate:Show()
-    -- end
+function eDungeonFilter.OnGroupRosterUpdate()
+    if C_ChallengeMode.IsChallengeModeActive() then
+        DungeonFilterRate:Show()
+    end
 end
 
-eDungeonFilter.AddOnLoaded = function()
+function eDungeonFilter.AddOnLoaded()
     CreateRateLayout()
-    eDungeonFilter.CacheParty()
+
+    if C_ChallengeMode.IsChallengeModeActive() == false then
+        eDungeonFilter:ClearMythicParty()
+    end
 end
 
-eDungeonFilter.GetFontString = function(name)
-    return _G[name]
-end
-
-eDungeonFilter.GetButton = function(name)
-    return _G[name]
+function eDungeonFilter.OnPlayerLogout()
+    eDungeonFiltereDungeonFilterMythicParty = eDungeonFilter:GetMythicParty()
 end
 
 function DungeonFilter_OnEvent(self, event, arg1, arg2)
@@ -512,11 +526,13 @@ function DungeonFilter_OnEvent(self, event, arg1, arg2)
     elseif event == "LFG_LIST_SEARCH_RESULTS_RECEIVED" or event == "LFG_LOCK_INFO_RECEIVED" then
         ShowDungeonFilter()
     elseif event == "CHALLENGE_MODE_START" then
-        eDungeonFilter.CacheParty()
+        eDungeonFilter:SetNewMythicParty()
     elseif event == "CHALLENGE_MODE_COMPLETED" then
         eDungeonFilter.OnChallengeModeComplete()
     elseif event == "GROUP_ROSTER_UPDATE" then
         eDungeonFilter.OnGroupRosterUpdate()
+    elseif event == "PLAYER_LOGOUT" then
+        eDungeonFilter.OnPlayerLogout()
     end
 end
 
@@ -541,8 +557,8 @@ end
 function LFMPlus_GetPlaystyleString(playstyle, activityInfo)
     if
         activityInfo and playstyle ~= (0 or nil) and
-            C_LFGList.GetLfgCategoryInfo(activityInfo.categoryID).showPlaystyleDropdown
-     then
+        C_LFGList.GetLfgCategoryInfo(activityInfo.categoryID).showPlaystyleDropdown
+    then
         local typeStr
         if activityInfo.isMythicPlusActivity then
             typeStr = "GROUP_FINDER_PVE_PLAYSTYLE"
@@ -561,6 +577,19 @@ end
 
 C_LFGList.GetPlaystyleString = function(playstyle, activityInfo)
     return LFMPlus_GetPlaystyleString(playstyle, activityInfo)
+end
+
+function eDungeonFilter.CreateFrame(type, name, parent, template)
+    ---@diagnostic disable-next-line: undefined-global
+    return CreateFrame(type, name, parent, template)
+end
+
+function eDungeonFilter.GetFontString(name)
+    return _G[name]
+end
+
+function eDungeonFilter.GetFrame(name)
+    return _G[name]
 end
 
 function SlashCmdList.DUNGEONFILTER(msg, editbox)

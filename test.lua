@@ -1,6 +1,8 @@
+---@diagnostic disable: lowercase-global, duplicate-set-field, undefined-global
 require "lunit"
-require "test-setup"
+require "blizzard-globals"
 require "DungeonFilter"
+require "test-setup"
 
 module("test", package.seeall, lunit.testcase)
 
@@ -12,14 +14,14 @@ module("test", package.seeall, lunit.testcase)
 --     assert_true( "Hello World!", "This test always fails!")
 -- end
 
-function xtest_OnMythicStart_CurrentPartyShouldNotBeNil()
+function test_OnMythicStart_CurrentPartyShouldNotBeNil()
     -- Arrange
     eDungeonFilter.GetParty = function()
         local result = {}
-        table.insert(result, {Name = "Saith"})
-        table.insert(result, {Name = "Targether-Anub"})
-        table.insert(result, {Name = "Hatis-Stormscale"})
-        table.insert(result, {Name = "Disc-Stormscale"})
+        table.insert(result, { Name = "Saith" })
+        table.insert(result, { Name = "Targether-Anub" })
+        table.insert(result, { Name = "Hatis-Stormscale" })
+        table.insert(result, { Name = "Disc-Stormscale" })
 
         return result
     end
@@ -40,19 +42,20 @@ function xtest_OnMythicStart_CurrentPartyShouldNotBeNil()
     eDungeonFilter.OnChallengeModeStart()
 
     -- Assert
-    assert_true(#eDungeonFilterPartyTemp.Players == 4, "Should be party of 4")
-    assert_true(eDungeonFilterPartyTemp.Level == 20)
-    assert_true(eDungeonFilterPartyTemp.DungeonName == "Waycrest Manor")
+    local mythicParty = eDungeonFilter:GetMythicParty()
+    assert_true(#mythicParty.Players == 4, "Should be party of 4")
+    assert_true(mythicParty.Level == 20)
+    assert_true(mythicParty.DungeonName == "Waycrest Manor")
 end
 
-function xtest_OnGameLog_WasNotPreviousInMythicPlus_CurrentPartyShouldBeNil()
+function test_OnGameLog_WasNotPreviousInMythicPlus_CurrentPartyShouldBeNil()
     -- Arrange
     eDungeonFilter.GetParty = function()
         local result = {}
-        table.insert(result, {Name = "Saith"})
-        table.insert(result, {Name = "Targether-Anub"})
-        table.insert(result, {Name = "Hatis-Stormscale"})
-        table.insert(result, {Name = "Disc-Stormscale"})
+        table.insert(result, { Name = "Saith" })
+        table.insert(result, { Name = "Targether-Anub" })
+        table.insert(result, { Name = "Hatis-Stormscale" })
+        table.insert(result, { Name = "Disc-Stormscale" })
 
         return result
     end
@@ -65,31 +68,23 @@ function xtest_OnGameLog_WasNotPreviousInMythicPlus_CurrentPartyShouldBeNil()
     eDungeonFilter.AddOnLoaded()
 
     -- Assert
-    assert_true(eDungeonFilterPartyTemp == nil)
+    assert_true(eDungeonFilter:GetMythicParty() == nil)
 end
 
-function xtest_OnGameLog_IsInMythicPlus_ShouldSetCurrentGroup()
+function test_OnGameLog_IsInMythicPlus_ShouldSetCurrentGroup()
     -- Arrange
-    eDungeonFilterPartyTemp = {
+    local mythicParty = {
         Players = {},
         Level = 20,
         DungeonName = "Waycrest Manor"
     }
 
-    table.insert(eDungeonFilterPartyTemp.Players, "Saith")
-    table.insert(eDungeonFilterPartyTemp.Players, "Targether-Anub")
-    table.insert(eDungeonFilterPartyTemp.Players, "Hatis-Stormscale")
-    table.insert(eDungeonFilterPartyTemp.Players, "Disc-Stormscale")
+    table.insert(mythicParty.Players, "Saith")
+    table.insert(mythicParty.Players, "Targether-Anub")
+    table.insert(mythicParty.Players, "Hatis-Stormscale")
+    table.insert(mythicParty.Players, "Disc-Stormscale")
 
-    eDungeonFilter.GetParty = function()
-        local result = {}
-        table.insert(result, "Saith 2")
-        table.insert(result, "Targether-Anub 2")
-        table.insert(result, "Hatis-Stormscale 2")
-        table.insert(result, "Disc-Stormscale 2")
-
-        return result
-    end
+    eDungeonFilter:SetNewMythicParty(mythicParty)
 
     C_ChallengeMode.IsChallengeModeActive = function()
         return true
@@ -107,118 +102,167 @@ function xtest_OnGameLog_IsInMythicPlus_ShouldSetCurrentGroup()
     eDungeonFilter.AddOnLoaded()
 
     -- Assert
-    assert_true(#eDungeonFilterPartyTemp.Players == 4, "Should be 4 players")
-    assert_true(eDungeonFilterPartyTemp.Players[1] == "Saith")
-    assert_true(eDungeonFilterPartyTemp.Players[2] == "Targether-Anub")
+    local mythicParty = eDungeonFilter:GetMythicParty()
+    assert_true(#mythicParty.Players == 4, "Should be 4 players")
+    assert_true(mythicParty.Players[1] == "Saith")
+    assert_true(mythicParty.Players[2] == "Targether-Anub")
 end
 
 function test_OnChallengeModeCompleted_ShouldShowRateModal_UpdatedFontStringNames()
     -- Arrange
+    function C_ChallengeMode.IsChallengeModeActive()
+        return false
+    end
 
-    eDungeonFilterPartyTemp = {
+    eDungeonFilter.AddOnLoaded()
+
+    local mythicParty = {
         Players = {},
         Level = 20,
         DungeonName = "Waycrest Manor"
     }
 
-    table.insert(eDungeonFilterPartyTemp.Players, "Saith")
-    table.insert(eDungeonFilterPartyTemp.Players, "Targether-Anub")
-    table.insert(eDungeonFilterPartyTemp.Players, "Hatis-Stormscale")
-    table.insert(eDungeonFilterPartyTemp.Players, "Disc-Stormscale")
+    table.insert(mythicParty.Players, "Saith")
+    table.insert(mythicParty.Players, "Targether-Anub")
+    table.insert(mythicParty.Players, "Hatis-Stormscale")
+    table.insert(mythicParty.Players, "Disc-Stormscale")
+
+    eDungeonFilter:SetNewMythicParty(mythicParty)
 
     DungeonFilterRate.Showing = false
     function DungeonFilterRate:Show()
         DungeonFilterRate.Showing = true
     end
 
-    C_ChallengeMode.IsChallengeModeActive = function()
-        return false
-    end
-
-    eDungeonFilter.GetCachedParty = function()
-        return eDungeonFilterPartyTemp
-    end
+    -- eDungeonFilter.PrintTable(eDungeonFilter)
 
     -- Act
     eDungeonFilter.OnChallengeModeComplete()
 
     -- Assert
     assert_true(DungeonFilterRate.Showing == true)
-    assert_true(eDungeonFilter.GetFontString("DungeonFilterRate_FontString1"):GetText() == "Saith")
-    assert_true(_G["DungeonFilterRate_FontString2"]:GetText() == "Targether-Anub")
-    assert_true(_G["DungeonFilterRate_FontString3"]:GetText() == "Hatis-Stormscale")
-    assert_true(_G["DungeonFilterRate_FontString4"]:GetText() == "Disc-Stormscale")
 
-    -- assert_true(_G["DungeonFilterRate_EditBox_1"]:GetText() == "")
-    -- assert_true(_G["DungeonFilterRate_EditBox_2"]:GetText() == "")
-    -- assert_true(_G["DungeonFilterRate_EditBox_3"]:GetText() == "")
-    -- assert_true(_G["DungeonFilterRate_EditBox_4"]:GetText() == "")
+    local fontString = eDungeonFilter.GetFontString("DungeonFilterRate_FontString1")
+    assert_true(fontString ~= nil)
+    assert_true(fontString:GetText() == "Saith")
 
-    -- assert_true(_G["DungeonFilterRate_Party1_Button1_Button"]:GetFontString():GetTextColor() == "")
+    fontString = eDungeonFilter.GetFontString("DungeonFilterRate_FontString2")
+    assert_true(fontString ~= nil)
+    assert_true(fontString:GetText() == "Targether-Anub")
+
+    fontString = eDungeonFilter.GetFontString("DungeonFilterRate_FontString3")
+    assert_true(fontString ~= nil)
+    assert_true(fontString:GetText() == "Hatis-Stormscale")
+
+    fontString = eDungeonFilter.GetFontString("DungeonFilterRate_FontString4")
+    assert_true(fontString ~= nil)
+    assert_true(fontString:GetText() == "Disc-Stormscale")
+
+    local editBox = eDungeonFilter.GetFrame("DungeonFilterRate_EditBox_1")
+    assert_true(editBox ~= nil)
+    assert_true(editBox:GetText() == "")
+
+    editBox = eDungeonFilter.GetFrame("DungeonFilterRate_EditBox_2")
+    assert_true(editBox ~= nil)
+    assert_true(editBox:GetText() == "")
+
+    editBox = eDungeonFilter.GetFrame("DungeonFilterRate_EditBox_3")
+    assert_true(editBox ~= nil)
+    assert_true(editBox:GetText() == "")
+
+    editBox = eDungeonFilter.GetFrame("DungeonFilterRate_EditBox_4")
+    assert_true(editBox ~= nil)
+    assert_true(editBox:GetText() == "")
+
+    local row = 0
+    local column = 0
+    while row < 4 do
+        row = row + 1
+        column = 0
+
+        while column < 4 do
+            column = column + 1
+            local button = eDungeonFilter.GetFrame("DungeonFilterRate_Party" .. row .. "_Button" .. column .. "_Button")
+            assert_true(button ~= nil)
+
+            local fontString = button:GetFontString()
+            assert_true(fontString ~= nil)
+
+            local r, g, b, a = fontString:GetTextColor()
+            assert_true(r == 1)
+            assert_true(g == 1)
+            assert_true(b == 1)
+            assert_true(a == nil)
+        end
+    end
 end
 
-function xtest_PartyMemberLeaves_InMythicPlus_ShouldShowRateModal()
+function test_PartyMemberLeaves_InAnActiveMythicPlus_ShouldShowRateModal()
     -- Arrange
+    local mythicParty = {
+        Players = {},
+        Level = 20,
+        DungeonName = "Waycrest Manor"
+    }
 
-    eDungeonFilter.GetParty = function()
-        local result = {}
-        table.insert(result, {Name = "Saith"})
-        table.insert(result, {Name = "Targether-Anub"})
-        table.insert(result, {Name = "Hatis-Stormscale"})
-        table.insert(result, {Name = "Disc-Stormscale"})
+    table.insert(mythicParty.Players, "Saith")
+    table.insert(mythicParty.Players, "Targether-Anub")
+    table.insert(mythicParty.Players, "Hatis-Stormscale")
+    table.insert(mythicParty.Players, "Disc-Stormscale")
 
-        return result
+    eDungeonFilter:SetNewMythicParty(mythicParty)
+
+    eDungeonFilter.Showing = false
+    eDungeonFilter.Show = function()
+        eDungeonFilter.Showing = true
     end
 
-    eDungeonFilter.IsInMythicPlus = function()
+    function C_ChallengeMode.IsChallengeModeActive()
         return true
     end
 
-    eDungeonFilter.SetParty()
-
-    eDungeonFilter.Showing = false
-    eDungeonFilter.Show = function()
-        eDungeonFilter.Showing = true
-    end
-
     -- Act
     eDungeonFilter.OnGroupRosterUpdate()
 
     -- Assert
-    assert_true(eDungeonFilter.Showing == true)
-    assert_true(eDungeonFilter == nil)
+    assert_true(DungeonFilterRate.Showing == true)
+
+    local mythicParty = eDungeonFilter:GetMythicParty()
+    assert_true(mythicParty ~= nil)
 end
 
-function xtest_PartyMemberLeaves_NotInMythicPlus_ShouldNotShowRateModal()
+function test_PartyMemberLeaves_NotInMythicPlus_ShouldNotShowRateModal()
     -- Arrange
+    local mythicParty = {
+        Players = {},
+        Level = 20,
+        DungeonName = "Waycrest Manor"
+    }
 
-    eDungeonFilter.GetParty = function()
-        local result = {}
-        table.insert(result, {Name = "Saith"})
-        table.insert(result, {Name = "Targether-Anub"})
-        table.insert(result, {Name = "Hatis-Stormscale"})
-        table.insert(result, {Name = "Disc-Stormscale"})
+    table.insert(mythicParty.Players, "Saith")
+    table.insert(mythicParty.Players, "Targether-Anub")
+    table.insert(mythicParty.Players, "Hatis-Stormscale")
+    table.insert(mythicParty.Players, "Disc-Stormscale")
 
-        return result
-    end
-
-    eDungeonFilter.IsInMythicPlus = function()
-        return false
-    end
-
-    eDungeonFilter.SetParty()
+    eDungeonFilter:SetNewMythicParty(mythicParty)
 
     eDungeonFilter.Showing = false
     eDungeonFilter.Show = function()
         eDungeonFilter.Showing = true
     end
 
+    function C_ChallengeMode.IsChallengeModeActive()
+        return true
+    end
+
     -- Act
     eDungeonFilter.OnGroupRosterUpdate()
 
     -- Assert
-    assert_true(eDungeonFilter.Showing == false)
-    assert_true(eDungeonFilter.CurrentParty == nil)
+    assert_true(DungeonFilterRate.Showing == true)
+
+    local mythicParty = eDungeonFilter:GetMythicParty()
+    assert_true(mythicParty ~= nil)
 end
 
 lunit.main(...) -- required.

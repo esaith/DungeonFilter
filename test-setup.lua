@@ -1,96 +1,154 @@
-if SlashCmdList == nil then
-    SlashCmdList = {}
-end
+---@diagnostic disable: duplicate-set-field, lowercase-global, undefined-global
+
 
 if eDungeonFilter == nil then
     eDungeonFilter = {}
 end
 
-if eDungeonFilter == nil then
-    eDungeonFilter = {}
+if eDungeonFilterMythicGroup == nil then
+    eDungeonFilterMythicGroup = {}
 end
 
-if C_LFGList == nil then
-    C_LFGList = {}
-end
-
-if C_ChallengeMode == nil then
-    C_ChallengeMode = {}
-end
-
-local localButtons
-eDungeonFilter.GetButton = function(name)
-    if localButtons[name] ~= nil then
-        return localButtons[name]
-    end
-
-    print("Creating button for " .. name)
-
-    local button = {
-        Name = ""
-    }
-
-    function button:GetFontString(self)
-        print("Getting button font string")
-        return eDungeonFilter.GetFontString(self.Name)
-    end
-
-    localButtons[name] = button
-    return button
-end
 
 local localFontStrings = {}
-eDungeonFilter.GetFontString = function(name)
+function eDungeonFilter.GetFontString(name)
     if localFontStrings[name] ~= nil then
-        print("Returning font string " .. name)
         return localFontStrings[name]
     end
 
-    print("Creating fontstring for " .. name)
-    local fontString = {
-        Name = "",
-        myString = ""
+    return nil;
+end
+
+function UpdateName(name, parent)
+    if parent == nil then
+        return name
+    end
+
+    local index = string.find(name, '$parent')
+    if index == nil then
+        return name
+    end
+
+    name = string.gsub(name, '$parent', parent)
+    return name
+end
+
+local localFrames = {}
+function eDungeonFilter.CreateFrame(type, name, parent, template)
+    name = UpdateName(name, parent)
+
+    local frame = {
+        Name = name,
+        Parent = parent,
+        Template = template,
+        Width = 0,
+        Height = 0,
+        Showing = false,
+        Event = "",
+        Func = nil,
+        FontString = nil,
+        Type = type
     }
 
-    function fontString:GetName(self)
-        self.Name = name
+    function frame:SetSize(width, height)
+        self.Width = width
+        self.Height = height
     end
 
-    function fontString:GetText(self)
-        print("Getting font string for " .. self.Name)
-        return self.myString
+    function frame:SetScript(event, func)
+        self.Event = event
+        self.Func = func
     end
 
-    function fontString:SetText(self, str)
-        print("Setting font string for " .. self.Name .. ", " .. str)
-        self.myString = str
+    function frame:Show()
+        self.Showing = true
     end
 
-    function fontString:SetTextColor(self, r, g, b, a)
-        self.r = r
-        self.g = g
-        self.b = b
-        self.a = a
+    function frame:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs)
+        self.point = point
+        self.relativeTo = relativeTo
+        self.relativePoint = relativePoint
+        self.xOfs = xOfs
+        self.yOfs = yOfs
     end
 
-    function fontString:GetTextColor(self, r, g, b, a)
-        self.r = r
-        self.g = g
-        self.b = b
-        self.a = a
+    function frame:CreateFontString(name, layer, font)
+        name = UpdateName(name, self.Name)
 
-        return {
-            r = self.r,
-            g = self.g,
-            b = self.b,
-            a = self.a
+        if localFontStrings[name] ~= nil then
+            return localFontStrings[name]
+        end
+
+        local fontString = {
+            Name = name,
+            Layer = layer,
+            Font = font,
+            myString = ""
         }
+
+        function fontString:GetName()
+            self.Name = name
+        end
+
+        function fontString:GetText()
+            return self.myString
+        end
+
+        function fontString:SetText(str)
+            self.myString = str
+        end
+
+        function fontString:SetTextColor(r, g, b, a)
+            self.r = r
+            self.g = g
+            self.b = b
+            self.a = a
+        end
+
+        function fontString:GetTextColor()
+            return self.r, self.g, self.b, self.a
+        end
+
+        function fontString:SetPoint(point, relativeTo, relativePoint, xOfs, yOfs)
+            self.point = point
+            self.relativeTo = relativeTo
+            self.relativePoint = relativePoint
+            self.xOfs = xOfs
+            self.yOfs = yOfs
+        end
+
+        function fontString:GetPoint(self)
+            return self.point, self.relativeTo, self.relativePoint, self.xOfs, self.yOfs
+        end
+
+        localFontStrings[name] = fontString
+        return fontString
     end
 
-    localFontStrings[name] = fontString
-    return fontString
+    function frame:SetFontString(fontString)
+        self.FontString = fontString
+    end
+
+    function frame:GetFontString()
+        return self.FontString
+    end
+
+    function frame:SetText(str)
+        self.Text = str
+    end
+
+    function frame:GetText()
+        return self.Text
+    end
+
+    localFrames[name] = frame
+    return frame
+end
+
+function eDungeonFilter.GetFrame(name)
+    return localFrames[name]
 end
 
 if DungeonFilterRate == nil then
-    DungeonFilterRate = {}
+    DungeonFilterRate = eDungeonFilter.CreateFrame("Frame", "DungeonFilterRate");
 end
