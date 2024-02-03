@@ -16,10 +16,6 @@ if eDungeonFilterVar.Player == nil then
     eDungeonFilterVar.Player = {}
 end
 
-if DungeonFilter == nil then
-    DungeonFilter = {}
-end
-
 local dungeons = {}
 dungeons["tott"] = "Throne of the Tides"
 dungeons["dht"] = "Darkheart Thicket"
@@ -49,8 +45,8 @@ end
 local function ShowDungeonFilter()
     if
         LFGListFrame.SearchPanel:IsShown() and LFGListFrame.SearchPanel.categoryID == DungeonCategoryId and
-        LFGListFrame.SearchPanel.SearchBox:IsShown()
-    then
+            LFGListFrame.SearchPanel.SearchBox:IsShown()
+     then
         DungeonFilter:Show()
     else
         DungeonFilter:Hide()
@@ -179,7 +175,7 @@ end
 local function UpdateRateButtons()
     local mythicParty = eDungeonFilter:GetMythicParty()
     if mythicParty == nil then
-        print('mythic party is null')
+        print("mythic party is null")
         return
     end
 
@@ -292,8 +288,8 @@ local function CreateRateLayout()
 
         local name = "DungeonFilterRate_EditBox_" .. row
 
-        local editButton = eDungeonFilter.CreateFrame("EditBox", name, DungeonFilterRate,
-            "ChatFrameEditBoxTemplateCustom")
+        local editButton =
+            eDungeonFilter.CreateFrame("EditBox", name, DungeonFilterRate, "ChatFrameEditBoxTemplateCustom")
         editButton:SetPoint("TOPLEFT", btnA, "BOTTOMLEFT", 5, -10)
 
         previousWidget = editButton
@@ -382,11 +378,11 @@ local function LFGListUtil_SortSearchResults_Hook(results)
 
     local sortedKeys =
         getKeysSortedByValue(
-            idsToRemove,
-            function(a, b)
-                return a > b
-            end
-        )
+        idsToRemove,
+        function(a, b)
+            return a > b
+        end
+    )
 
     for _, key in ipairs(sortedKeys) do
         table.remove(results, idsToRemove[key])
@@ -557,8 +553,8 @@ end
 function LFMPlus_GetPlaystyleString(playstyle, activityInfo)
     if
         activityInfo and playstyle ~= (0 or nil) and
-        C_LFGList.GetLfgCategoryInfo(activityInfo.categoryID).showPlaystyleDropdown
-    then
+            C_LFGList.GetLfgCategoryInfo(activityInfo.categoryID).showPlaystyleDropdown
+     then
         local typeStr
         if activityInfo.isMythicPlusActivity then
             typeStr = "GROUP_FINDER_PVE_PLAYSTYLE"
